@@ -135,12 +135,18 @@ class EthernetChat:
         else:
             destination_mac = self.broadcast_mac # TODO: What MAC could you use to reach everybody?
 
-        ethernet_header = destination_mac + self.local_mac + chat_frame_type # TODO: Assemble the Ethernet Header
-        ethernet_payload = len(self.nickname).to_bytes(1, 'big') + self.nickname + message  # TODO: Assemble the Payload
+        ethernet_header = destination_mac + self.local_mac + self.chat_frame_type # TODO: Assemble the Ethernet Header
+
+        nickname_length = len(self.nickname)
+        nickname_length_bytes = bytes([nickname_length])
+        nickname_bytes = self.nickname.encode()
+        message_bytes = message.encode()
+
+        ethernet_payload = nickname_length_bytes + nickname_bytes + message_bytes  # TODO: Assemble the Payload
         self.send_frame(ethernet_header + ethernet_payload)
 
         if destination_mac == self.broadcast_mac:
-            print(f"{start_line}{bold_blue}You ({sellsf.nickname}) say:{reset_font} {message}")
+            print(f"{start_line}{bold_blue}You ({self.nickname}) say:{reset_font} {message}")
         else:
             print(f"{start_line}{bold_purple}You ({self.nickname}) whisper to {dest_nickname}: {reset_font}{message}")
 
