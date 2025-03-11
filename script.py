@@ -1,8 +1,8 @@
 #!/usr/bin/python
-"""Simple chat based on Ethernet.
- 
-It requires sudo or CAP_NET_RAW capabilities in the python interpreter.
-"""
+""Simple chat based on Ethernet.
+
+""It requires sudo or CAP_NET_RAW capabilities in the python interpreter.
+
 
 import argparse
 import socket
@@ -96,14 +96,14 @@ class EthernetChat:
         if source_mac == self.local_mac:
             # We are seeing a message we sent ourselves
             return
-
+																			
         # Decapsulate the payload  (refer to the packet format for details)
         nickname_length = frame[14] # TODO: Extract the length of the nickname
         if nickname_length == 0 or len(frame_payload) < nickname_length + 2:
             return
-        nickname = frame[15:15 + nickname_length].decode('utf-8') # TODO: Use the extracted nickname_length to slice the payload and get the nickname
-        message = frame[15 + nickname_length:].decode('utf-8')  # TODO: Extract the message
-
+        nickname = frame[15+nickname_length] # TODO: Use the extracted nickname_length to slice the payload and get the nickname
+        message = frame[15+nickname_length:]  # TODO: Extract the message
+																			
         # BONUS: Do you see any problem here? TIP: How would you prevent impersonation?
         self.chat_users[nickname] = source_mac
 
@@ -123,22 +123,22 @@ class EthernetChat:
     def send_chat_packet(self, destination_mac: bytes, message: str):
         """Send a chat message."""
         assert len(message) <= 255
-
+																			
         # Handle /whisper command
         match = re.match(whisper, message)
         if match:
             dest_nickname, message = match.group("nickname"), match.group("message")
-            destination_mac = self.chat_users[dest_nickname] # TODO: Get the MAC address corresponding to a user from the self.chat_user dictionary
+            destination_mac = self.chat_users[dest_nickname]  # TODO: Get the MAC address corresponding to a user from the self.chat_user dictionary
             if destination_mac is None:
                 print(f"{start_line}{bold_red}User {dest_nickname} does not exist{reset_font}")
                 return
         else:
-            destination_mac = self.broadcast_mac # TODO: What MAC could you use to reach everybody?
+            destination_mac = broadcast_mac  # TODO: What MAC could you use to reach everybody?
 
-        ethernet_header = destination_mac + self.local_mac + chat_frame_type # TODO: Assemble the Ethernet Header
-        ethernet_payload = len(self.nickname).to_bytes(1, 'big') + self.nickname + message  # TODO: Assemble the Payload
+        ethernet_header = destination_mac + self.local_mac + chat_frame_type  # TODO: Assemble the Ethernet Header
+        ethernet_payload = len(self.nickname).to_bytes(1, 'big') + self.nickname + message # TODO: Assemble the Payload
         self.send_frame(ethernet_header + ethernet_payload)
-
+																			
         if destination_mac == self.broadcast_mac:
             print(f"{start_line}{bold_blue}You ({sellsf.nickname}) say:{reset_font} {message}")
         else:
