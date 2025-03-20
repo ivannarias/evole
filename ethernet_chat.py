@@ -105,7 +105,13 @@ class EthernetChat:
         message = frame[15 + nickname_length:].decode('utf-8')  # TODO: Extract the message
 
         # BONUS: Do you see any problem here? TIP: How would you prevent impersonation?
-        self.chat_users[nickname] = source_mac
+        # Verifiquem per evitar suplantació
+        if nickname in self.chat_users:
+            if self.chat_users[nickname] != source_mac:
+                print(f"{bold_red}ALERTA: Suplantació d'identitat detectada! {nickname} intenta enviar un missatge des d'una MAC diferent.{reset_font}")
+                return
+        else:
+            self.chat_users[nickname] = source_mac  # Assignar la MAC al nickname si és nou
 
         self.receive_chat_packet(
             source_mac=source_mac,
